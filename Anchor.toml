@@ -1,0 +1,19 @@
+[toolchain]
+
+[features]
+seeds = false
+skip-lint = false
+
+[programs.localnet]
+solan_pause = "BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ"
+mock_program = "2obgbc7tYuJ63HfgHJeXXSf78YHT1Uy6hRptLA7Jfc2V"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "Localnet"
+wallet = "/Users/thomasrodriguez/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
