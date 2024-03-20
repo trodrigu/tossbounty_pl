@@ -1,12 +1,12 @@
 [package]
-name = "solan_pause"
+name = "tossbounty"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "solan_pause"
+name = "tossbounty"
 
 [features]
 no-entrypoint = []
@@ -17,3 +17,4 @@ default = []
 
 [dependencies]
 anchor-lang = "0.29.0"
+anchor-spl = "0.29.0"

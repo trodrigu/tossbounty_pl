@@ -5,7 +5,7 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-solan_pause = "BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ"
+tossbounty = "BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ"
 mock_program = "2obgbc7tYuJ63HfgHJeXXSf78YHT1Uy6hRptLA7Jfc2V"
 
 [registry]
