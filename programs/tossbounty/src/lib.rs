@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_lang::prelude::Pubkey;
 use anchor_spl::token::{self, Transfer, TokenAccount, Token};
 
 declare_id!("BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ");
@@ -7,15 +8,23 @@ declare_id!("BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ");
 pub mod tossbounty {
     use super::*;
 
-    pub fn create_and_fund_bounty(ctx: Context<CreateAndFundBounty>, description: String, org: String, amount: u64) -> Result<()> {
+    pub fn create_bounty(ctx: Context<CreateBounty>, description: String, org: String, amount: u64, bump: u8) -> Result<()> {
         let bounty = &mut ctx.accounts.bounty;
         bounty.description = description;
         bounty.org = org;
         bounty.amount = amount;
-        bounty.to_token_account = *ctx.accounts.to_token_account.to_account_info().key;
+        bounty.funding_account = *ctx.accounts.funding_account.to_account_info().key;
         bounty.status = BountyStatus::Unclaimed;
+        bounty.bump = bump;
 
-        token::transfer(ctx.accounts.transfer_context(), amount)?;
+        Ok(())
+    }
+
+    pub fn claim_bounty(ctx: Context<ClaimBounty>) -> Result<()> {
+        let bounty = &mut ctx.accounts.bounty;
+        bounty.status = BountyStatus::Claimed;
+
+        token::transfer(ctx.accounts.transfer_context(), ctx.accounts.bounty.amount)?;
 
         Ok(())
     }
@@ -27,7 +36,8 @@ pub struct Bounty {
     pub org: String,
     pub amount: u64,
     pub status: BountyStatus,
-    pub to_token_account: Pubkey,
+    pub funding_account: Pubkey,
+    pub bump: u8,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
@@ -38,26 +48,39 @@ pub enum BountyStatus {
 }
 
 #[derive(Accounts)]
-pub struct CreateAndFundBounty<'info> {
+pub struct CreateBounty<'info> {
     #[account(mut)]
-    pub payer: Signer<'info>,
-    #[account(init, payer = payer, seeds = [b"bounty", payer.key.as_ref()], bump, space = 10240)]
+    pub authority: Signer<'info>,
+    #[account(init, payer = authority, seeds = [b"bounty", authority.key.as_ref()], bump, space = 10240)]
     pub bounty: Account<'info, Bounty>,
     #[account(mut)]
-    pub to_token_account: Account<'info, TokenAccount>,
-    #[account(mut)]
-    pub from_token_account: Account<'info, TokenAccount>,
+    pub funding_account: Account<'info, TokenAccount>,
     pub system_program: Program<'info, System>,
-    pub token_program: Program<'info, Token>,
 }
 
-impl<'info> CreateAndFundBounty<'info> {
+#[derive(Accounts)]
+pub struct ClaimBounty<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(mut)]
+    pub whitehat_token_account: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub funding_account: Account<'info, TokenAccount>,
+    #[account(seeds = [b"bounty", authority.key.as_ref()], bump = bounty.bump, has_one = funding_account)]
+    pub bounty: Account<'info, Bounty>,
+    pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+}
+
+impl<'info> ClaimBounty<'info> {
     pub fn transfer_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
-            from: self.from_token_account.to_account_info(),
-            to: self.to_token_account.to_account_info(),
-            authority: self.payer.to_account_info(),
+            from: self.funding_account.to_account_info(),
+            to: self.whitehat_token_account.to_account_info(),
+            authority: self.authority.to_account_info(),
         };
+
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 }
+
