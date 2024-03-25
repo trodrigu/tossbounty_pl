@@ -6,13 +6,18 @@ skip-lint = false
 
 [programs.localnet]
 tossbounty = "BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ"
-mock_program = "2obgbc7tYuJ63HfgHJeXXSf78YHT1Uy6hRptLA7Jfc2V"
+
+[programs.devnet]
+tossbounty = "BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ"
+
+[programs.mainnet]
+tossbounty = "BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "Devnet"
 wallet = "/Users/thomasrodriguez/.config/solana/id.json"
 
 [scripts]
