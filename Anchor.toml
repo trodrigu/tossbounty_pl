@@ -18,8 +18,7 @@ tossbounty = "BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ"
 url = "https://api.apr.dev"
 
 [provider]
-#cluster = "Devnet"
-cluster = "localnet"
+cluster = "Devnet"
 wallet = "/Users/thomasrodriguez/.config/solana/id.json"
 
 [scripts]

@@ -25,14 +25,14 @@ pub mod tossbounty {
         bounty.funding_account = *ctx.accounts.funding_account.to_account_info().key;
         bounty.status = BountyStatus::Unclaimed;
         bounty.bump = bump;
-        bounty.example_program_id = *ctx.accounts.example_program_id.key;
+        bounty.program_id = *ctx.accounts.program_id.key;
 
         Ok(())
     }
 
     pub fn pause_example(ctx: Context<PauseExample>) -> Result<()> {
         let context = CpiContext::new(
-            ctx.accounts.example_program_id.to_account_info(),
+            ctx.accounts.program_id.to_account_info(),
             Pause {
                 state: ctx.accounts.state.to_account_info(),
                 authority: ctx.accounts.authority.to_account_info(),
@@ -45,7 +45,7 @@ pub mod tossbounty {
         Ok(())
     }
 
-    pub fn claim_bounty(ctx: Context<ClaimBounty>) -> Result<()> {
+    pub fn claim_bounty_example(ctx: Context<ClaimBountyExample>) -> Result<()> {
         let bounty = &mut ctx.accounts.bounty;
         bounty.status = BountyStatus::Claimed;
 
@@ -63,7 +63,7 @@ pub struct Bounty {
     pub status: BountyStatus,
     pub funding_account: Pubkey,
     pub bump: u8,
-    pub example_program_id: Pubkey,
+    pub program_id: Pubkey,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
@@ -82,11 +82,11 @@ pub struct CreateBountyExample<'info> {
     #[account(mut)]
     pub funding_account: Account<'info, TokenAccount>,
     pub system_program: Program<'info, System>,
-    pub example_program_id: Program<'info, Example>,
+    pub program_id: Program<'info, Example>,
 }
 
 #[derive(Accounts)]
-pub struct ClaimBounty<'info> {
+pub struct ClaimBountyExample<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
     #[account(mut)]
@@ -103,15 +103,15 @@ pub struct ClaimBounty<'info> {
 pub struct PauseExample<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
-    #[account(mut, seeds = [b"pause", authority.key.as_ref()], seeds::program = example_program_id.key(), bump)]
+    #[account(mut, seeds = [b"pause", authority.key.as_ref()], seeds::program = program_id.key(), bump)]
     /// CHECK: manual checks
     pub state: UncheckedAccount<'info>,
     /// CHECK: manual checks
-    pub example_program_id: Program<'info, Example>,
+    pub program_id: Program<'info, Example>,
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> ClaimBounty<'info> {
+impl<'info> ClaimBountyExample<'info> {
     pub fn transfer_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.funding_account.to_account_info(),

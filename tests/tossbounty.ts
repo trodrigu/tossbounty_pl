@@ -1,19 +1,8 @@
 import * as anchor from "@coral-xyz/anchor";
-import { Tossbounty } from "../target/types/tossbounty"; // Adjust according to your actual path
-import { createTokenAccount } from "./token-utils"; // Helper utils for SPL operations
-import {
-  clusterApiUrl,
-  Connection,
-  Keypair,
-  Transaction,
-  SystemProgram,
-  PublicKey,
-  sendAndConfirmTransaction,
-  LAMPORTS_PER_SOL,
-} from "@solana/web3.js";
+import { Tossbounty } from "../target/types/tossbounty";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as splToken from "@solana/spl-token";
-import * as bs58 from "bs58";
-import * as assert from "assert";
+import assert from "assert";
 
 describe("Bounty Program with SPL Token Rewards", () => {
     const provider = anchor.AnchorProvider.env();
@@ -21,10 +10,10 @@ describe("Bounty Program with SPL Token Rewards", () => {
     const program = anchor.workspace.Tossbounty as Program<Tossbounty>;
     const example = anchor.workspace.Example as Program<Example>;
     const payer = (provider.wallet as NodeWallet).payer;
-    let mintPubkey;
-    let fundingAccount;
-    let bountyRewardAmount;
-    let whitehatTokenAccount;
+    let mintPubkey: anchor.web3.PublicKey;
+    let fundingAccount: anchor.web3.PublicKey;
+    let bountyRewardAmount: anchor.BN;
+    let whitehatTokenAccount: anchor.web3.PublicKey;
 
     before(async () => {
       mintPubkey = await splToken.createMint(
@@ -40,6 +29,8 @@ describe("Bounty Program with SPL Token Rewards", () => {
         await provider.connection.requestAirdrop(payer.publicKey, 10*LAMPORTS_PER_SOL);
 
         const balance = await provider.connection.getBalance(payer.publicKey);
+
+        assert.ok(balance > 0);
 
         bountyRewardAmount = new anchor.BN(10000);
 
@@ -59,14 +50,14 @@ describe("Bounty Program with SPL Token Rewards", () => {
           bounty: bountyPda,
           fundingAccount: fundingAccount, 
           tokenProgram: splToken.TOKEN_PROGRAM_ID,
-          exampleProgramId: example.programId,
+          programId: example.programId,
         });
 
-        const tx = await ix.rpc();
+        await ix.rpc();
     });
 
     it("Claims a bounty", async () => {
-        const [bountyPda, bump] = anchor.web3.PublicKey.findProgramAddressSync([
+        const [bountyPda, _bump] = anchor.web3.PublicKey.findProgramAddressSync([
           anchor.utils.bytes.utf8.encode("bounty"),
           payer.publicKey.toBuffer(),
         ], program.programId)
@@ -75,7 +66,7 @@ describe("Bounty Program with SPL Token Rewards", () => {
 
         await provider.connection.requestAirdrop(whitehatKeypair.publicKey, 10 * LAMPORTS_PER_SOL);
 
-        await splToken.mintTo(provider.connection, payer, mintPubkey, fundingAccount, payer.publicKey, bountyRewardAmount, [], undefined, splToken.TOKEN_PROGRAM_ID);
+        await splToken.mintTo(provider.connection, payer, mintPubkey, fundingAccount, payer.publicKey, bountyRewardAmount.toNumber(), [], undefined, splToken.TOKEN_PROGRAM_ID);
 
         whitehatTokenAccount = await splToken.createAccount(
           provider.connection,
@@ -84,31 +75,27 @@ describe("Bounty Program with SPL Token Rewards", () => {
           whitehatKeypair.publicKey, 
         );
 
-        const ix = await program.methods.claimBounty().accounts({
+        const ix = await program.methods.claimBountyExample().accounts({
           bounty: bountyPda,
           whitehatTokenAccount: whitehatTokenAccount, 
           fundingAccount: fundingAccount,
         });
 
-        const tx = await ix.rpc();
+        await ix.rpc();
     });
 
     it("Pauses the org program associated with the bounty", async () => {
-        const [statePda, bump] = anchor.web3.PublicKey.findProgramAddressSync([
+        const [statePda, _bump] = anchor.web3.PublicKey.findProgramAddressSync([
           anchor.utils.bytes.utf8.encode("pause"),
           payer.publicKey.toBuffer(),
         ], example.programId)
 
-        await provider.connection.requestAirdrop(statePda, 10*LAMPORTS_PER_SOL);
-
-        const balance = await provider.connection.getBalance(statePda);
-
         const ix = await program.methods.pauseExample().accounts({
-          exampleProgramId: example.programId,
+          programId: example.programId,
           state: statePda,
         });
 
-        const tx = await ix.rpc();
+        await ix.rpc();
     });
 });
 
