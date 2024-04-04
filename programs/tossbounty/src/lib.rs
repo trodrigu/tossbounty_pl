@@ -67,7 +67,7 @@ pub struct CreateBountyExample<'info> {
     #[account(mut)]
     pub funding_account: Account<'info, TokenAccount>,
     pub system_program: Program<'info, System>,
-    pub program_id: Program<'info, Example>,
+    pub program_id: Program<'info, Jupiter>,
 }
 
 #[derive(Accounts)]
