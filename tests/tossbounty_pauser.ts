@@ -11,9 +11,6 @@ describe("Pauser program", () => {
     const example = anchor.workspace.Example as Program<Example>;
     const payer = (provider.wallet as NodeWallet).payer;
     let mintPubkey: anchor.web3.PublicKey;
-    let fundingAccount: anchor.web3.PublicKey;
-    let bountyRewardAmount: anchor.BN;
-    let whitehatTokenAccount: anchor.web3.PublicKey;
 
     before(async () => {
       mintPubkey = await splToken.createMint(
