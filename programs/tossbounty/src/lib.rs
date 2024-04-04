@@ -30,21 +30,6 @@ pub mod tossbounty {
         Ok(())
     }
 
-    pub fn pause_example(ctx: Context<PauseExample>) -> Result<()> {
-        let context = CpiContext::new(
-            ctx.accounts.program_id.to_account_info(),
-            Pause {
-                state: ctx.accounts.state.to_account_info(),
-                authority: ctx.accounts.authority.to_account_info(),
-                system_program: ctx.accounts.system_program.to_account_info(),
-            },
-        );
-
-        pause(context)?;
-
-        Ok(())
-    }
-
     pub fn claim_bounty_example(ctx: Context<ClaimBountyExample>) -> Result<()> {
         let bounty = &mut ctx.accounts.bounty;
         bounty.status = BountyStatus::Claimed;
@@ -96,17 +81,6 @@ pub struct ClaimBountyExample<'info> {
     #[account(seeds = [b"bounty", authority.key.as_ref()], bump = bounty.bump, has_one = funding_account)]
     pub bounty: Account<'info, Bounty>,
     pub token_program: Program<'info, Token>,
-    pub system_program: Program<'info, System>,
-}
-
-#[derive(Accounts)]
-pub struct PauseExample<'info> {
-    #[account(mut)]
-    pub authority: Signer<'info>,
-    #[account(mut, seeds = [b"pause", authority.key.as_ref()], seeds::program = program_id.key(), bump)]
-    /// CHECK: manual checks
-    pub state: UncheckedAccount<'info>,
-    pub program_id: Program<'info, Example>,
     pub system_program: Program<'info, System>,
 }
 

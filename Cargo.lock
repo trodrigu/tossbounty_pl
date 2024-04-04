@@ -2410,6 +2410,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "tossbounty_pauser"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "example",
+]
+
+[[package]]
 name = "typenum"
 version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

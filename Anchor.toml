@@ -4,12 +4,14 @@
 seeds = false
 skip-lint = false
 
-[programs.localnet]
-tossbounty = "BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ"
-example = "BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYR"
-
 [programs.devnet]
 tossbounty = "BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ"
+tossbounty_pauser = "9AUryp328sF7BKnv63arhPvrqHNqmwpQEvm7ry6oEnHh"
+
+[programs.localnet]
+example = "BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYR"
+tossbounty = "BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ"
+tossbounty_pauser = "9AUryp328sF7BKnv63arhPvrqHNqmwpQEvm7ry6oEnHh"
 
 [programs.mainnet]
 tossbounty = "BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ"

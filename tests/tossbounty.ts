@@ -83,19 +83,5 @@ describe("Bounty Program with SPL Token Rewards", () => {
 
         await ix.rpc();
     });
-
-    it("Pauses the org program associated with the bounty", async () => {
-        const [statePda, _bump] = anchor.web3.PublicKey.findProgramAddressSync([
-          anchor.utils.bytes.utf8.encode("pause"),
-          payer.publicKey.toBuffer(),
-        ], example.programId)
-
-        const ix = await program.methods.pauseExample().accounts({
-          programId: example.programId,
-          state: statePda,
-        });
-
-        await ix.rpc();
-    });
 });
 
