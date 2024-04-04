@@ -44,9 +44,10 @@ describe("Bounty Program with SPL Token Rewards", () => {
         const [bountyPda, bump] = anchor.web3.PublicKey.findProgramAddressSync([
           anchor.utils.bytes.utf8.encode("bounty"),
           payer.publicKey.toBuffer(),
+          example.programId.toBuffer()
         ], program.programId)
 
-        const ix = await program.methods.createBountyExample("a cool bounty", "Acme", bountyRewardAmount, bump).accounts({
+        const ix = await program.methods.createBountyExample(description, org, bountyRewardAmount, bump).accounts({
           bounty: bountyPda,
           fundingAccount: fundingAccount, 
           tokenProgram: splToken.TOKEN_PROGRAM_ID,
@@ -60,6 +61,7 @@ describe("Bounty Program with SPL Token Rewards", () => {
         const [bountyPda, _bump] = anchor.web3.PublicKey.findProgramAddressSync([
           anchor.utils.bytes.utf8.encode("bounty"),
           payer.publicKey.toBuffer(),
+          example.programId.toBuffer()
         ], program.programId)
 
         const whitehatKeypair = anchor.web3.Keypair.generate();
@@ -79,6 +81,7 @@ describe("Bounty Program with SPL Token Rewards", () => {
           bounty: bountyPda,
           whitehatTokenAccount: whitehatTokenAccount, 
           fundingAccount: fundingAccount,
+          programId: example.programId,
         });
 
         await ix.rpc();

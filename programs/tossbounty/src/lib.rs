@@ -62,7 +62,7 @@ pub enum BountyStatus {
 pub struct CreateBountyExample<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
-    #[account(init, payer = authority, seeds = [b"bounty", authority.key.as_ref()], bump, space = DISCRIMINATOR_LENGTH + DESCRIPTION_LENGTH + ORG_LENGTH + AMOUNT_LENGTH + PUBLIC_KEY_LENGTH + STATUS_LENGTH + BUMP_LENGTH + PUBLIC_KEY_LENGTH)]
+    #[account(init, payer = authority, seeds = [b"bounty", authority.key.as_ref(), program_id.key.as_ref()], bump, space = DISCRIMINATOR_LENGTH + DESCRIPTION_LENGTH + ORG_LENGTH + AMOUNT_LENGTH + PUBLIC_KEY_LENGTH + STATUS_LENGTH + BUMP_LENGTH + PUBLIC_KEY_LENGTH)]
     pub bounty: Account<'info, Bounty>,
     #[account(mut)]
     pub funding_account: Account<'info, TokenAccount>,
@@ -78,10 +78,11 @@ pub struct ClaimBountyExample<'info> {
     pub whitehat_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
     pub funding_account: Account<'info, TokenAccount>,
-    #[account(seeds = [b"bounty", authority.key.as_ref()], bump = bounty.bump, has_one = funding_account)]
+    #[account(seeds = [b"bounty", authority.key.as_ref(), program_id.key.as_ref()], bump = bounty.bump, has_one = funding_account)]
     pub bounty: Account<'info, Bounty>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
+    pub program_id: Program<'info, Example>,
 }
 
 impl<'info> ClaimBountyExample<'info> {

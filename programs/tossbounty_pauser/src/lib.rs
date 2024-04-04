@@ -29,7 +29,7 @@ pub struct PauseExample<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
     #[account(mut, seeds = [b"pause", authority.key.as_ref()], seeds::program = program_id.key(), bump)]
-    /// CHECK: manual checks
+    /// CHECK: manual checks in callee
     pub state: UncheckedAccount<'info>,
     pub program_id: Program<'info, Example>,
     pub system_program: Program<'info, System>,
