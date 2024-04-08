@@ -14,6 +14,8 @@ describe("Bounty Program with SPL Token Rewards", () => {
     let fundingAccount: anchor.web3.PublicKey;
     let bountyRewardAmount: anchor.BN;
     let whitehatTokenAccount: anchor.web3.PublicKey;
+    const org = "coral-xyz";
+    const description = "Fix a bug in our app";
 
     before(async () => {
       mintPubkey = await splToken.createMint(
