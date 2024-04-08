@@ -1,9 +1,8 @@
-use anchor_lang::prelude::*;
 use anchor_lang::prelude::Pubkey;
-use anchor_spl::token::{self, Transfer, TokenAccount, Token};
-use example::{cpi::accounts::Pause, cpi::pause, program::Example};
+use anchor_lang::prelude::*;
+use anchor_spl::token::{self, Token, TokenAccount, Transfer};
 
-declare_id!("BYzWEaZXS7Zf4SY6dcqnsjySp9qLEmB9C3WvyigxtpYQ");
+declare_id!("F6xSV3U35V8stCdd1zpuVujRVZm9LimfG3YhRT2csUGm");
 
 const DESCRIPTION_LENGTH: usize = 280 * 4; // 280 chars max.
 const ORG_LENGTH: usize = 140 * 4; // 140 chars max.
@@ -12,12 +11,25 @@ const PUBLIC_KEY_LENGTH: usize = 32;
 const STATUS_LENGTH: usize = 9 * 4; // 9 chars max.
 const BUMP_LENGTH: usize = 8;
 const DISCRIMINATOR_LENGTH: usize = 8;
-
 #[program]
 pub mod tossbounty {
     use super::*;
 
-    pub fn create_bounty_example(ctx: Context<CreateBountyExample>, description: String, org: String, amount: u64, bump: u8) -> Result<()> {
+    pub fn create_bounty_example(
+        ctx: Context<CreateBountyExample>,
+        description: String,
+        org: String,
+        amount: u64,
+        bump: u8,
+    ) -> Result<()> {
+        let registry: Vec<String> = vec![
+            "wyt78UXHtukcbQsJbRPFGf979jxPMvbEij8qAqNsgUx".to_string(),
+            "EbLTbDtQoUtqab4mUqquvEJQVuJvewFGVCQjY9mitREt".to_string(),
+            "3goACQjYU2pmueD5zxiyXCzs7tXkq22qyG8hmm6MzS2n".to_string(),
+            "3eA2wNQhthWn1HGcZyzpFaZwemrcazV15vNHXjLMhm1c".to_string(),
+            "GY41EV1W7wiACD77HDq79cs5VMQJpQTXoaoNdiF4HQQ6".to_string(),
+        ];
+
         let bounty = &mut ctx.accounts.bounty;
         bounty.description = description;
         bounty.org = org;
@@ -25,7 +37,13 @@ pub mod tossbounty {
         bounty.funding_account = *ctx.accounts.funding_account.to_account_info().key;
         bounty.status = BountyStatus::Unclaimed;
         bounty.bump = bump;
-        bounty.program_id = *ctx.accounts.program_id.key;
+
+        // check program id is a part of the registry
+        if registry.contains(&ctx.accounts.program_id.key.to_string()) {
+            bounty.program_id = *ctx.accounts.program_id.key;
+        } else {
+            return Err(ErrorCode::InvalidProgramId.into());
+        }
 
         Ok(())
     }
@@ -33,6 +51,21 @@ pub mod tossbounty {
     pub fn claim_bounty_example(ctx: Context<ClaimBountyExample>) -> Result<()> {
         let bounty = &mut ctx.accounts.bounty;
         bounty.status = BountyStatus::Claimed;
+
+        let registry: Vec<String> = vec![
+            "wyt78UXHtukcbQsJbRPFGf979jxPMvbEij8qAqNsgUx".to_string(),
+            "EbLTbDtQoUtqab4mUqquvEJQVuJvewFGVCQjY9mitREt".to_string(),
+            "3goACQjYU2pmueD5zxiyXCzs7tXkq22qyG8hmm6MzS2n".to_string(),
+            "3eA2wNQhthWn1HGcZyzpFaZwemrcazV15vNHXjLMhm1c".to_string(),
+            "GY41EV1W7wiACD77HDq79cs5VMQJpQTXoaoNdiF4HQQ6".to_string(),
+        ];
+
+        // check program id is a part of the registry
+        if registry.contains(&ctx.accounts.program_id.key.to_string()) {
+            bounty.program_id = *ctx.accounts.program_id.key;
+        } else {
+            return Err(ErrorCode::InvalidProgramId.into());
+        }
 
         token::transfer(ctx.accounts.transfer_context(), ctx.accounts.bounty.amount)?;
 
@@ -67,7 +100,8 @@ pub struct CreateBountyExample<'info> {
     #[account(mut)]
     pub funding_account: Account<'info, TokenAccount>,
     pub system_program: Program<'info, System>,
-    pub program_id: Program<'info, Example>,
+    /// CHECK: via the program id Registry
+    pub program_id: UncheckedAccount<'info>,
 }
 
 #[derive(Accounts)]
@@ -82,7 +116,8 @@ pub struct ClaimBountyExample<'info> {
     pub bounty: Account<'info, Bounty>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
-    pub program_id: Program<'info, Example>,
+    /// CHECK: via the program id Registry
+    pub program_id: UncheckedAccount<'info>,
 }
 
 impl<'info> ClaimBountyExample<'info> {
@@ -96,4 +131,3 @@ impl<'info> ClaimBountyExample<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 }
-
