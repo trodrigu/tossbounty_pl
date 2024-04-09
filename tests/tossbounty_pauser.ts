@@ -26,7 +26,7 @@ describe("Pauser program", () => {
         const [statePda, _bump] = anchor.web3.PublicKey.findProgramAddressSync([
           anchor.utils.bytes.utf8.encode("pause"),
           payer.publicKey.toBuffer(),
-        ], example.programId)
+        ], example.programId);
 
         const ix = await program.methods.pauseExample().accounts({
           programId: example.programId,
